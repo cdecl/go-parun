@@ -5,43 +5,33 @@ package main
 import (
 	"bytes"
 	"testing"
-	"sync"
+	_ "sync"
 	"fmt"
+	"strings"
+	"os/exec"
 )
 
 
 func assert(t *testing.T, b bool, msg string) {
-	if !b {
-		t.Error(msg)
-	}
+	if !b { t.Error(msg) }
 }
 
-func getArgs() Args {
-	args := Args{
-			File:    func(s string) *string { return &s }(""),
-			Proc:    func(s int) *int { return &s }(1),
-			Pholder:func(s bool) *bool { return &s }(false),
-			Cmd:   []string{"echo"},
-	}
-		
-	return args
-}
 func Test_cmdString(t *testing.T) {
 	s, _ := cmdString("main.go")
 	assert(t, len(s) > 0, "File open eror")
 } 
 
 func Test_Worker(t *testing.T) {
-	ch := make(chan bool, 1)
-	wg := sync.WaitGroup{}
-	defer close(ch)
-	defer wg.Wait()
+	cmd := exec.Command("../../bin/parun.exe", "-f", "../../input.txt", "echo")
+	
+	out, err := cmd.Output()
+	assert(t, err == nil, "exec.Command | cmd.Output()")
+	assert(t, strings.Trim(string(out), "\n") == "input.txt", strings.Trim(string(out), "\n"))
+}
 
-	args := getArgs()
-
+func Test_Code(t *testing.T) {
 	buff := new(bytes.Buffer)
-	go Worker("test", args, &wg, ch, buff)
-		
-	fmt.Println(buff)
-	fmt.Println("testssss")
+
+	fmt.Fprintln(buff, "test")
+	assert(t, strings.Trim(buff.String(), "\n") == "test", buff.String())
 }

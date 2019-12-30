@@ -1,5 +1,1 @@
-Sleep 1 && echo 1
-Sleep 1 && echo 2
-Sleep 1 && echo 3
-Sleep 1 && echo 4
-Sleep 1 && echo 5
+input.txt
