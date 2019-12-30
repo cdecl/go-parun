@@ -1,7 +1,7 @@
 
 GOPATH=$(CURDIR)
 GOBIN=$(GOPATH)/bin
-GOFILES=$(wildcard src/*.go)
+GOFILES=./...
 EXEC=parun.exe
 
 build:
@@ -9,6 +9,9 @@ build:
 
 run:
 	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go run $(GOFILES)
+
+test:
+	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test $(GOFILES)
 
 get:
 	# -env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go get -u github.com/shirou/gopsutil
