@@ -7,30 +7,31 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"strings"
 	"sync"
 )
 
-type Param struct {
+type Args struct {
 	File    *string
 	Proc    *int
-	Pholder *string
+	Pholder *bool
 	Cmd     []string
 }
 
-func (p Param) Debug() {
+func (p Args) Debug() {
 	fmt.Println(fmt.Sprintf("File[%s], Proc[%d], Pholder[%s] : Cmd[%s]", *p.File, *p.Proc, *p.Pholder, p.Cmd))
 }
 
-func usage() Param {
-	param := Param{}
-	param.File = flag.String("f", "", "Input file path, default")
-	param.Pholder = flag.String("i", "{}", "Placeholder string (default : {})")
-	param.Proc = flag.Int("p", 1, "Thread pool count")
+func usage() Args {
+	args := Args{}
+	args.File = flag.String("f", "", "Input file path, default")
+	args.Pholder = flag.Bool("i", false, "Placeholder (default : {})")
+	args.Proc = flag.Int("p", 1, "Thread pool count")
 	flag.Parse()
 
-	param.Cmd = flag.Args()
-	// param.Debug()
-	return param
+	args.Cmd = flag.Args()
+	// args.Debug()
+	return args
 }
 
 func readFile(fp *os.File) []string {
@@ -64,36 +65,47 @@ func cmdString(path string) ([]string, bool) {
 	return ss, true
 }
 
-func Worker(s string, param []string, wg *sync.WaitGroup, ch chan bool) {
+func Worker(redirect string, args Args, wg *sync.WaitGroup, ch chan bool) {
 	ch <- true
 	defer func() { <-ch }()
 	defer wg.Done()
 
-	varcmd := []string{"/c", s}
-	varcmd = append(varcmd, param...)
+	cmdstr := args.Cmd
+	varcmd := []string{}
 
-	// cmd := exec.Command("cmd", "/c", s)
-	cmd := exec.Command("cmd", varcmd...)
+	if *args.Pholder {
+		for i, cmd := range cmdstr {
+			cmdstr[i] = strings.ReplaceAll(cmd, "{}", redirect)
+		}
+	}
+
+	varcmd = append(varcmd, cmdstr[1:]...)
+
+	if !*args.Pholder {
+		varcmd = append(varcmd, redirect)
+	}
+
+	cmd := exec.Command(cmdstr[0], varcmd...)
 	out, _ := cmd.Output()
 	fmt.Print(string(out))
 }
 
 func Run() {
-	param := usage()
-	cmds, ok := cmdString(*param.File)
+	args := usage()
+	cmds, ok := cmdString(*args.File)
 	if !ok {
 		fmt.Println("No Command")
 		return
 	}
 
-	ch := make(chan bool, *param.Proc)
+	ch := make(chan bool, *args.Proc)
 	wg := sync.WaitGroup{}
 	defer close(ch)
 	defer wg.Wait()
 
 	for _, cmd := range cmds {
 		wg.Add(1)
-		go Worker(cmd, param.Cmd, &wg, ch)
+		go Worker(cmd, args, &wg, ch)
 	}
 }
 
