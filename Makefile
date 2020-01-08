@@ -1,7 +1,7 @@
 
 GOPATH=$(CURDIR)
 GOBIN=$(GOPATH)/bin
-GOFILES=./...
+GOFILES=parun
 EXEC=parun.exe
 
 
@@ -17,8 +17,7 @@ test:
 	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test -v $(GOFILES)
 
 get:
-	# -env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go get -u github.com/shirou/gopsutil
-	-env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go get -u ./...
+	-env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go get -d ./...
 	
 cc:
 	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN)  GOOS=linux GOARCH=amd64 go build -o $(GOBIN)/linux/$(EXEC) $(GOFILES)
