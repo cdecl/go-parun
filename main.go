@@ -72,7 +72,7 @@ func ExecCommand(command string, args ...string) (string, error) {
 	reargs = append(reargs, args...)
 
 	output, err := exec.Command(command, reargs...).Output()
-	return strings.Trim(string(output), "\n"), err
+	return string(output), err
 }
 
 // Worker function
@@ -81,14 +81,15 @@ func Worker(input string, flagArgs Flags, wg *sync.WaitGroup, ch chan bool, fout
 	defer func() { <-ch }()
 	defer wg.Done()
 
-	varargs := flagArgs.VarArgs
-	varcmd := []string{}
+	varargs := []string{}
+	varargs = append(varargs, flagArgs.VarArgs...)
 
 	if *flagArgs.Pholder {
 		for i, args := range varargs {
-			varargs[i] = strings.ReplaceAll(args, "{}", input)
+			varargs[i] = strings.ReplaceAll(args, "{}", input) ///////////////
 		}
 	}
+	varcmd := []string{}
 	varcmd = append(varcmd, varargs[1:]...)
 
 	if !*flagArgs.Pholder {
