@@ -37,8 +37,8 @@ func Test_ExecTest(t *testing.T) {
 	INSTR := "1234"
 	output, err := ExecCommand("echo", INSTR)
 	assert(t, err == nil, "ExecCommand")
-	_ = output
-	// assert(t, output == INSTR, "Test ExecTest Error")
+
+	assert(t, strings.Trim(output, "\r\n") == INSTR, "Test ExecTest Error")
 }
 
 func Test_Worker(t *testing.T) {
@@ -54,7 +54,8 @@ func Test_Worker(t *testing.T) {
 	go Worker(TESTSTR, args, &wg, ch, buff)
 	wg.Wait()
 
-	assert(t, buff.String() == TESTSTR, TESTSTR)
+	str := strings.Trim(buff.String(), "\r\n")
+	assert(t, str == TESTSTR, TESTSTR)
 }
 
 func Test_Code(t *testing.T) {
