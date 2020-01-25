@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"os/exec"
 	"strings"
 	"sync"
 	"testing"
@@ -15,23 +14,31 @@ func assert(t *testing.T, b bool, msg string) {
 	}
 }
 
-func Test_cmdString(t *testing.T) {
-	s, _ := cmdString("main.go")
-	assert(t, len(s) > 0, "File open eror")
-}
-
-func getArgs() Args {
-	file := "../../input.txt"
+func getArgs() Flags {
+	file := "input.txt"
 	proc := 1
 	pholder := false
 
-	args := Args{
+	args := Flags{
 		File:    &file,
 		Proc:    &proc,
 		Pholder: &pholder,
-		Cmd:     []string{"echo"},
+		VarArgs: []string{"echo"},
 	}
 	return args
+}
+
+func Test_ReadArgs(t *testing.T) {
+	s, _ := ReadArgs("input.txt")
+	assert(t, len(s) > 0, "File Open Error")
+}
+
+func Test_ExecTest(t *testing.T) {
+	INSTR := "1234"
+	output, err := ExecCommand("echo", INSTR)
+	assert(t, err == nil, "ExecCommand")
+	_ = output
+	// assert(t, output == INSTR, "Test ExecTest Error")
 }
 
 func Test_Worker(t *testing.T) {
@@ -47,16 +54,7 @@ func Test_Worker(t *testing.T) {
 	go Worker(TESTSTR, args, &wg, ch, buff)
 	wg.Wait()
 
-	result := strings.Trim(buff.String(), "\n")
-	assert(t, result == TESTSTR, result)
-}
-
-func Test_Program(t *testing.T) {
-	cmd := exec.Command("../../bin/parun.exe", "-f", "../../input.txt", "echo")
-
-	out, err := cmd.Output()
-	assert(t, err == nil, "exec.Command | cmd.Output()")
-	assert(t, strings.Trim(string(out), "\n") == "input.txt", strings.Trim(string(out), "\n"))
+	assert(t, buff.String() == TESTSTR, TESTSTR)
 }
 
 func Test_Code(t *testing.T) {

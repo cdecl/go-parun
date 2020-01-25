@@ -1,24 +1,20 @@
 
-GOPATH=$(CURDIR)
-GOBIN=$(GOPATH)/bin
-GOFILES=parun
-EXEC=parun.exe
+PROJECT=parun
+BIN=$(CURDIR)/bin
+EXEC=$(PROJECT).exe
 
 
 all: build test
 
 build:
-	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go build -o $(GOBIN)/$(EXEC) $(GOFILES)
-
-run:
-	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go run $(GOFILES)
+	go build -o $(BIN)/$(EXEC)
 
 test:
-	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go test -v $(GOFILES)
+	go test -v 
 
-get:
-	-env GOPATH=$(GOPATH) GOBIN=$(GOBIN) go get -d ./...
+dep:
+	go mod tidy
 	
 cc:
-	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN)  GOOS=linux GOARCH=amd64 go build -o $(GOBIN)/linux/$(EXEC) $(GOFILES)
-	@env GOPATH=$(GOPATH) GOBIN=$(GOBIN)  GOOS=windows GOARCH=amd64 go build -o $(GOBIN)/windows/$(EXEC) $(GOFILES)
+	SET GOOS=linux& SET GOARCH=amd64& go build -o $(BIN)/linux/$(EXEC) 
+	SET GOOS=windows& SET GOARCH=amd64& go build -o $(BIN)/windows/$(EXEC) 
